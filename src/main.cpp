@@ -12,9 +12,9 @@
 #include <string.h>
 #include <array>
 
+#include "credentials.cpp"
+
 // Setup NetworkTimeProtocol Client
-const char *ssid = "Baba";
-const char *password = "6;H*AB6WDPek:C74";
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "de.pool.ntp.org");
 
