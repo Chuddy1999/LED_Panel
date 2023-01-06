@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>DigitalUhr</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.teal-light_green.min.css" />
+    <link rel="stylesheet" href="style.css">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jaames/iro"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header mdl-layout--fixed-tabs">
+        <header class="mdl-layout__header">
+            <div class="mdl-layout__header-row">
+                <!-- Title -->
+                <span class="mdl-layout-title">Phils Panel</span>
+                <div class="mdl-layout-spacer"></div>
+                <button class="mdl-button mdl-js-button mdl-button--icon customcolor" id="btn" value="1"
+                    onclick="Power()">
+                    <i class="material-icons">power_settings_new</i>
+                </button>
+                <div class="mdl-layout-spacer"></div>
+                <p class="state">Modus: <span id="state">%STATE%</p>
+                </state>
+            </div>
+            <!-- Tabs -->
+            <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
+                <a href="#fixed-tab-1" class="mdl-layout__tab is-active">DigitalUhr</a>
+                <a href="#fixed-tab-2" class="mdl-layout__tab">to be continued</a>
+            </div>
+        </header>
+        <main class="mdl-layout__content">
+            <section class="mdl-layout__tab-panel is-active" id="fixed-tab-1">
+                <div class="page-content">
+                    <!-- Your content goes here -->
+                    <div class="mdl-grid">
+                        <div class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--4dp mdl-cell--4-col-phone">
+                            <div class="mdl-card__title">
+                                <h6 class="title center">Farbe & Helligkeit</h6>
+                            </div>
+                            <div class="mdl-card__supporting-text wrapper" id="picker" oninput="chooseColor()"></div>
+                        </div>
+                        <div class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--4dp mdl-cell--4-col-phone">
+                            <div class="wrapper">
+                                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect title" for="checkbox-1">
+                                    <input type="checkbox" id="checkbox-1" class="mdl-checkbox__input" unchecked
+                                        onclick="Rainbow()">
+                                    <span class="mdl-checkbox__label customcolor2">Farbwechsel</span>
+                                </label>
+                                <h6>Geschwindigkeit</h6>
+                                <input class="mdl-slider mdl-js-slider" id="slider" type="range" min="0" max="100"
+                                    value="15" tabindex="0" oninput="changeSpeed()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="mdl-layout__tab-panel" id="fixed-tab-2">
+                <div class="page-content">
+                    <!-- Your content goes here -->
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>
+
+
+<script>
+    var gateway = `ws://${window.location.hostname}/ws`;
+    var websocket;
+    window.addEventListener('load', onload);
+
+    function onload(event) {
+        initWebSocket();
+        initPowerButton();
+        initSlider();
+        initTicker();
+    }
+
+    function initWebSocket() {
+        console.log('Trying to open a WebSocket connection…');
+        websocket = new WebSocket(gateway);
+        websocket.onopen = onOpen;
+        websocket.onclose = onClose;
+        websocket.onmessage = onMessage;
+    }
+
+    function onOpen(event) {
+        console.log('Connection opened');
+    }
+
+    function onClose(event) {
+        console.log('Connection closed');
+        setTimeout(initWebSocket, 2000);
+    }
+
+    function onMessage(event) {
+        var state;
+        if (event.data == "An") {
+            state = "An";
+        }
+        else {
+            state = "Aus";
+        }
+        document.getElementById('state').innerHTML = state;
+
+    }
+
+    function onLoad(event) {
+        initWebSocket();
+        initButton();
+    }
+
+    var colorPicker = new iro.ColorPicker('#picker', { borderWidth: 4 });
+
+    //=============================================================================
+    //                            Event listener                                 
+    //=============================================================================
+    colorPicker.on('input:end', function (color) {
+        console.log(JSON.stringify(color.hsv));
+        websocket.send('col'+JSON.stringify(color.hsv));
+
+    });
+
+    function Power() {
+        state = document.getElementById('btn').value;
+
+        if (state == 1) {
+            document.getElementById('btn').value = 0;
+            console.log('pw'+state);
+            websocket.send('pw'+0);
+        }
+        else {
+            document.getElementById('btn').value = 1;
+            console.log('pw'+state);
+            websocket.send('pw'+1);
+        }
+    }
+
+    function changeSpeed() {
+        speed = document.getElementById("slider").value;
+        console.log(speed);
+        websocket.send("sl" + speed);
+    }
+
+    function Rainbow() {
+        stateCheck = document.getElementById("checkbox-1").checked;
+        if (stateCheck == 1) {
+            console.log("Rainbow on");
+            websocket.send("Ron");
+        }
+        else {
+            console.log("Rainbow off");
+            websocket.send("Roff");
+        }
+    }
+
+    //upload FS cmd: pio run -t uploadfs
+</script>

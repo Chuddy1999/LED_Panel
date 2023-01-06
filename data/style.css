@@ -1,0 +1,44 @@
+html{
+    background-color: rgb(52, 58, 58);
+}
+
+.center{
+    margin: auto;
+}
+
+p{
+    color:white;
+}
+
+h6{
+    color:white;
+    text-align: center;
+}
+.wrapper{
+    margin: auto;
+    text-align: -webkit-center;
+}
+#placeMiddle {
+    margin: auto;
+    margin-top: 1vh;
+    width: 100vm;
+}
+
+#createBorder{
+    border-radius: 7px;
+    box-shadow: 0 0 10px -4px;
+}
+
+.mdl-card{
+    background-color:darkslategray;
+    min-height: 150px;
+}
+
+.customcolor{
+    color:black;
+}
+
+.customcolor2{
+    color:white;
+    font-size: 20px;
+}
