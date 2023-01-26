@@ -13,6 +13,7 @@
 #include <array>
 
 #include "credentials.cpp"
+#include "define_LED_grid.cpp"
 
 // Setup NetworkTimeProtocol Client
 WiFiUDP ntpUDP;
@@ -34,81 +35,7 @@ int16_t saturation = 180;
 uint8_t fadeSpeed = 15;
 byte RainbowOn = 0;
 
-// Setup for different grids on 7x15 board
-byte grid[7][15] = {
-    {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14},
-    {29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15},
-    {30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44},
-    {59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45},
-    {60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74},
-    {89, 88, 87, 86, 85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75},
-    {90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104}};
 
-byte border[] = {
-    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-    90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104};
-
-byte gridL[] = {
-    29, 28, 27,
-    30, 31, 32,
-    59, 58, 57,
-    60, 61, 62,
-    89, 88, 87};
-
-byte gridLM[] = {
-    25,
-    24,
-    23,
-    34,
-    35,
-    36,
-    55,
-    54,
-    53,
-    64,
-    65,
-    66,
-    85,
-    84,
-    83,
-};
-
-byte gridRM[] = {
-    21,
-    20,
-    19,
-    38,
-    39,
-    40,
-    51,
-    50,
-    49,
-    68,
-    69,
-    70,
-    81,
-    80,
-    79,
-};
-
-byte gridR[] = {
-    17, 16, 15,
-    42, 43, 44,
-    47, 46, 45,
-    72, 73, 74,
-    77, 76, 75};
-
-// Setup Numbers for 5x3 Grids
-byte Zero[] = {13, 0, 1, 2, 3, 6, 9, 12, 13, 14, 11, 8, 5};
-byte One[] = {7, 2, 4, 5, 8, 11, 14};
-byte Two[] = {12, 0, 1, 2, 5, 8, 7, 6, 9, 12, 13, 14};
-byte Three[] = {12, 0, 1, 2, 5, 6, 7, 8, 11, 12, 13, 14};
-byte Four[] = {10, 0, 3, 6, 7, 8, 11, 14, 2, 5};
-byte Five[] = {12, 0, 1, 2, 3, 6, 7, 8, 11, 12, 13, 14};
-byte Six[] = {12, 0, 3, 6, 9, 12, 13, 14, 11, 8, 7, 1};
-byte Seven[] = {8, 0, 1, 2, 5, 8, 11, 14};
-byte Eight[] = {14, 0, 1, 2, 3, 5, 6, 7, 8, 9, 11, 12, 13, 14};
-byte Nine[] = {12, 0, 1, 2, 3, 5, 6, 7, 8, 11, 13, 14};
 
 byte zeroT;
 byte oneT;
@@ -189,7 +116,7 @@ void instantOn(byte NumberGrid[], byte Number[])
   }
 }
 
-void fadeIn(byte NumberGrid[], byte Number[])
+/*void fadeIn(byte NumberGrid[], byte Number[])
 {
   int len = Number[0];
   for (int b = 15; b <= brightn; b++)
@@ -201,9 +128,10 @@ void fadeIn(byte NumberGrid[], byte Number[])
     FastLED.show();
     delay(5);
   }
-}
+}*/
 
-void fadeOut(byte NumberGrid[], byte Number[])
+
+/*void fadeOut(byte NumberGrid[], byte Number[])
 {
   int len = Number[0];
   for (int f = brightn; f >= 15; f--)
@@ -219,11 +147,9 @@ void fadeOut(byte NumberGrid[], byte Number[])
   {
     leds[NumberGrid[Number[i]]] = CHSV(color, saturation, 0);
   }
-}
+}*/
 
-void borderTimer()
-{
-}
+
 
 void gridTest()
 {
