@@ -17,42 +17,43 @@ byte border[] = {
     90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104};
 
 
-byte grid_for_content(byte pos){
-    byte grid_array[5][3];
+vector<vector<byte>>grid_for_content(byte pos){
+    vector<vector<byte>> grid_array;
 
-    for (int i=0+pos; i<3+pos; i++){
-        
-        for(int l=1; l<6; l++){
-            grid_array[l-1][i-pos] = grid[l][i];
+    for (int h = 0; h < 5; h++){
+
+        for (int w = 0; w < 3; w++){
+            grid_array[h][w] = grid[h-1][w+pos];
         }
     }
-    return grid_array[5][3];
+    return grid_array;
 }
 
+
 // distance for clock
-byte L=0;
-byte LM=4;
-byte RM=8;
-byte R=12;
+byte pos_L=0;
+byte pos_LM=4;
+byte pos_RM=8;
+byte pos_R=12;
 
 // defined grids for displaying time
-byte gridL[5][3] = {grid_for_content(L)};
-byte gridLM[5][3] = {grid_for_content(LM)};
-byte gridRM[5][3] = {grid_for_content(RM)};
-byte gridR[5][3] = {grid_for_content(R)};
+vector<vector<byte>>gridL = grid_for_content(pos_L);
+vector<vector<byte>>gridLM = grid_for_content(pos_LM);
+vector<vector<byte>>gridRM = grid_for_content(pos_RM);
+vector<vector<byte>>gridR = grid_for_content(pos_R);
 
 // draw symbols into grid
-vector<byte> drawer(bool symbol[5][3], byte grid_to_draw[5][3]){
+vector<byte> drawer(bool symbol[5][3], vector<vector<byte>>grid_to_draw){
     vector<byte> symbol_on_grid_vector = {};
     
     for (int i=0; i<6; i++){
-        for (int l=0; l<3; i++){
+        for (int l=0; l<3; l++){
             if (symbol[i][l] == 1){
                 symbol_on_grid_vector.push_back(grid_to_draw[i][l]);
             }
         }
     }
-    return symbol_on_grid_vector;
+    return symbol_on_grid_vector;       // returns all bytes of grid, that shall light up
 }
 
 // Alphabet
@@ -98,8 +99,154 @@ bool F[5][3] = {
     {1,0,0},
     {1,0,0}
 };
+bool G[5][3] = {
+    {1,1,1},
+    {1,0,0},
+    {1,0,1},
+    {1,0,1},
+    {1,1,1}
+};
+bool H[5][3] = {
+    {1,0,1},
+    {1,0,1},
+    {1,1,1},
+    {1,0,1},
+    {1,0,1}
+};
+bool I[5][3] = {
+    {1,1,1},
+    {0,1,0},
+    {0,1,0},
+    {0,1,0},
+    {1,1,1}
+};
+bool J[5][3] = {
+    {1,1,1},
+    {0,0,1},
+    {1,0,1},
+    {1,0,1},
+    {0,1,1}
+};
+bool K[5][3] = {
+    {1,0,1},
+    {1,1,0},
+    {1,0,0},
+    {1,1,0},
+    {1,0,1}
+};
+bool L[5][3] = {
+    {1,0,0},
+    {1,0,0},
+    {1,0,0},
+    {1,0,0},
+    {1,1,1}
+};
+bool M[5][3] = {
+    {1,0,1},
+    {1,1,1},
+    {1,0,1},
+    {1,0,1},
+    {1,0,1}
+};
+bool N[5][3] = {
+    {0,0,0},
+    {0,0,0},
+    {1,1,1},
+    {1,0,1},
+    {1,0,1}
+};
+bool O[5][3] = {
+    {0,1,0},
+    {1,0,1},
+    {1,0,1},
+    {1,0,1},
+    {0,1,0}
+};
+bool P[5][3] = {
+    {1,1,1},
+    {1,0,1},
+    {1,1,1},
+    {1,0,0},
+    {1,0,0}
+};
+bool Q[5][3] = {
+    {1,1,1},
+    {1,0,1},
+    {1,1,1},
+    {0,0,1},
+    {0,0,1}
+};
+bool R[5][3] = {
+    {1,1,1},
+    {1,0,1},
+    {1,1,1},
+    {1,1,0},
+    {1,0,1}
+};
+bool S[5][3] = {
+    {1,1,1},
+    {1,0,0},
+    {1,1,1},
+    {0,0,1},
+    {1,1,1}
+};
+bool T[5][3] = {
+    {1,1,1},
+    {0,1,0},
+    {0,1,0},
+    {0,1,0},
+    {0,1,0}
+};
+bool U[5][3] = {
+    {1,0,1},
+    {1,0,1},
+    {1,0,1},
+    {1,0,1},
+    {1,1,1}
+};
+bool V[5][3] = {
+    {0,0,0},
+    {1,0,1},
+    {1,0,1},
+    {1,0,1},
+    {0,1,0}
+};
+bool W[5][3] = {
+    {1,0,1},
+    {1,0,1},
+    {1,0,1},
+    {1,1,1},
+    {1,0,1}
+};
+bool X[5][3] = {
+    {0,0,0},
+    {0,0,0},
+    {1,0,1},
+    {0,1,0},
+    {1,0,1}
+};
+bool Y[5][3] = {
+    {1,0,1},
+    {1,0,1},
+    {1,1,1},
+    {0,1,0},
+    {0,1,0}
+};
+bool Z[5][3] = {
+    {0,0,0},
+    {0,0,0},
+    {1,1,1},
+    {0,1,0},
+    {1,1,1}
+};
 
-
+bool space[5][3] = {
+    {0,0,0},
+    {0,0,0},
+    {0,0,0},
+    {0,0,0},
+    {0,0,0}
+};
 
 
 bool null[5][3] = {

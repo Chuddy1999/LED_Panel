@@ -20,7 +20,7 @@ WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "de.pool.ntp.org");
 
 AsyncWebServer server(80);
-AsyncWebSocket ws("/ws");
+AsyncWebSocket websocket("/ws");
 String header;
 
 // Setup FastLED
@@ -51,10 +51,10 @@ byte nineT;
 int Hour;
 int minu;
 int sec;
-int L;
-int LM;
-int RM;
-int R;
+int val_L;
+int val_LM;
+int val_RM;
+int val_R;
 
 // Date
 bool isLastSundayOver(int weekday, int day)
@@ -107,108 +107,50 @@ int getTimeOffset()
 }
 
 // Functions
-void instantOn(byte NumberGrid[], byte Number[])
+void instantOn(vector<byte>symbol)
 {
-  int len = Number[0];
+  int len = symbol.size();
   for (int i = 1; i < len; i++)
   {
-    leds[NumberGrid[Number[i]]] = CHSV(color, saturation, brightn);
+    leds[symbol[i]] = CHSV(color, saturation, brightn);
   }
 }
 
-/*void fadeIn(byte NumberGrid[], byte Number[])
-{
-  int len = Number[0];
-  for (int b = 15; b <= brightn; b++)
-  {
-    for (int i = 1; i < len; i++)
-    {
-      leds[NumberGrid[Number[i]]] = CHSV(color, saturation,b);
-    }
-    FastLED.show();
-    delay(5);
+void setTime(int time_piece, vector<vector<byte>>grid_position){
+  vector<byte>symbol;
+  switch(time_piece){
+    case 0:
+      symbol = drawer(null, grid_position);
+      break;
+    case 1:
+      symbol = drawer(one, grid_position);
+      break;
+    case 2:
+      symbol = drawer(two, grid_position);
+      break;
+    case 3:
+      symbol = drawer(three, grid_position);
+      break;
+    case 4:
+      symbol = drawer(four, grid_position);
+      break;
+    case 5:
+      symbol = drawer(five, grid_position);
+      break;
+    case 6:
+      symbol = drawer(six, grid_position);
+      break;
+    case 7:
+      symbol = drawer(seven, grid_position);
+      break;
+    case 8:
+      symbol = drawer(eight, grid_position);
+      break;
+    case 9:
+      symbol = drawer(nine, grid_position);
+      break;
   }
-}*/
-
-
-/*void fadeOut(byte NumberGrid[], byte Number[])
-{
-  int len = Number[0];
-  for (int f = brightn; f >= 15; f--)
-  {
-    for (int i = 1; i < len; i++)
-    {
-      leds[NumberGrid[Number[i]]] = CHSV(color, saturation, f);
-    }
-    FastLED.show();
-    delay(5);
-  }
-  for (int i = 1; i < len; i++)
-  {
-    leds[NumberGrid[Number[i]]] = CHSV(color, saturation, 0);
-  }
-}*/
-
-
-
-void gridTest()
-{
-  for (int r = 0; r < 7; r++)
-  {
-    for (int c = 0; c < 15; c++)
-    {
-      leds[grid[r][c]] = CRGB::RosyBrown;
-      FastLED.show();
-      delay(50);
-      FastLED.clear();
-    }
-  }
-}
-
-void setTime(byte gridTime[], int timePiece)
-{
-  switch (timePiece)
-  {
-  case 0:
-    instantOn(gridTime, Zero);
-    break;
-
-  case 1:
-    instantOn(gridTime, One);
-    break;
-
-  case 2:
-    instantOn(gridTime, Two);
-    break;
-
-  case 3:
-    instantOn(gridTime, Three);
-    break;
-
-  case 4:
-    instantOn(gridTime, Four);
-    break;
-
-  case 5:
-    instantOn(gridTime, Five);
-    break;
-
-  case 6:
-    instantOn(gridTime, Six);
-    break;
-
-  case 7:
-    instantOn(gridTime, Seven);
-    break;
-
-  case 8:
-    instantOn(gridTime, Eight);
-    break;
-
-  case 9:
-    instantOn(gridTime, Nine);
-    break;
-  }
+  instantOn(symbol);
 }
 
 void getTime()
@@ -219,15 +161,17 @@ void getTime()
   minu = timeClient.getMinutes();
   sec = timeClient.getSeconds();
 
-  L = Hour / 10;
-  LM = Hour % 10;
-  RM = minu / 10;
-  R = minu % 10;
+  val_L = Hour / 10;
+  setTime(val_L,gridL);
 
-  setTime(gridL, L);
-  setTime(gridLM, LM);
-  setTime(gridRM, RM);
-  setTime(gridR, R);
+  val_LM = Hour % 10;
+  setTime(val_LM, gridLM);
+
+  val_RM = minu / 10;
+  setTime(val_RM, gridRM);
+
+  val_R = minu % 10;
+  setTime(val_R, gridR);
 }
 
 void rainbow()
@@ -383,8 +327,8 @@ void setup()
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
-  ws.onEvent(onWsEvent);
-  server.addHandler(&ws);
+  websocket.onEvent(onWsEvent);
+  server.addHandler(&websocket);
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(LittleFS, "/index.html", String(), false, processor); });
