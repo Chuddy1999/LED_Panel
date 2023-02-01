@@ -105,7 +105,6 @@
         websocket = new WebSocket(gateway);
         websocket.onopen = onOpen;
         websocket.onclose = onClose;
-        websocket.onmessage = onMessage;
     }
 
     function onOpen(event) {
@@ -115,17 +114,6 @@
     function onClose(event) {
         console.log('Connection closed');
         setTimeout(initWebSocket, 2000);
-    }
-
-    function onMessage(event) {
-        var state;
-        if (event.data == "An") {
-            state = "An";
-        } else {
-            state = "Aus";
-        }
-        document.getElementById('state').innerHTML = state;
-
     }
 
     //=============================================================================
@@ -139,12 +127,7 @@
 
     function togglePower() {
         button = document.getElementById('power-button');
-        button.style.color = "black"
-        if (state == 1) {
-            websocket.send('pw' + 0);
-        } else {
-            websocket.send('pw' + 1);
-        }
+        websocket.send("pw")
     }
 
     function changeSpeed() {
