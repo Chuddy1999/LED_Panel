@@ -34,19 +34,9 @@ int16_t color = 0;
 int16_t saturation = 180;
 uint8_t fadeSpeed = 15;
 byte RainbowOn = 0;
+byte mode = 0;
 
 
-
-byte zeroT;
-byte oneT;
-byte twoT;
-byte threeT;
-byte fourT;
-byte fiveT;
-byte sixT;
-byte sevenT;
-byte eightT;
-byte nineT;
 
 int Hour;
 int minu;
@@ -115,6 +105,9 @@ void instantOn(vector<byte>symbol)
     leds[symbol[i]] = CHSV(color, saturation, brightn);
   }
 }
+
+/* __________ code to display time __________ */
+
 
 void setTime(int time_piece, vector<vector<byte>>grid_position){
   vector<byte>symbol;
@@ -185,6 +178,12 @@ void rainbow()
     color = color + 1;
   }
 }
+
+/* __________ code to display text __________ */
+
+
+
+
 
 void handleWSData(String cutData)
 {
@@ -344,9 +343,16 @@ void setup()
 void loop()
 {
   // put your main code here, to run repeatedly:
-  timeClient.setTimeOffset(getTimeOffset());
-  timeClient.update();
-  getTime();
+  if (mode == 0) {    // display time mode
+    timeClient.setTimeOffset(getTimeOffset());
+    timeClient.update();
+
+    getTime();
+  }
+  else if (mode == 1){    // display text mode
+
+  }
+
   rainbow();
 
   FastLED.show();
