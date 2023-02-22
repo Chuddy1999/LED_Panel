@@ -11,9 +11,11 @@
 #include <iostream>
 #include <string.h>
 #include <array>
+#include <vector>
 
-#include "credentials.cpp"
-#include "define_LED_grid.cpp"
+#include "credentials.h"
+#include "define_LED_grid.h"
+
 
 // Setup NetworkTimeProtocol Client
 WiFiUDP ntpUDP;
@@ -144,6 +146,10 @@ void setTime(int time_piece, vector<vector<byte>>grid_position){
       break;
   }
   instantOn(symbol);
+
+  for (byte i: symbol){
+    Serial.println(i);
+  }
 }
 
 void getTime()
@@ -224,9 +230,6 @@ void handleWSData(String cutData)
       {
         HSV[delLoop] = cutData.substring(del0 + 1, del2);
       }
-      Serial.println(HSV[0]);
-      Serial.println(HSV[1]);
-      Serial.println(HSV[2]);
 
       color = map(HSV[0].toInt(), 0, 360, 0, 255);
       saturation = map(HSV[1].toInt(), 0, 100, 0, 255);
@@ -239,10 +242,8 @@ void handleWSData(String cutData)
   else if (testsl == 1)
   {
     String sl = cutData.substring(2);
-    Serial.println(sl);
     sint8_t slinverted = sl.toInt() - 100;
     slinverted = -1 * slinverted;
-    Serial.println(slinverted);
     fadeSpeed = slinverted;
   }
 
@@ -250,7 +251,6 @@ void handleWSData(String cutData)
   else if (testpw == 1)
   {
     String pw = cutData.substring(2);
-    Serial.println(pw);
     if (pw == "0")
     {
       brightn = 0;
@@ -265,7 +265,6 @@ void handleWSData(String cutData)
   else if (testro == 1)
   {
     String ro = cutData.substring(1);
-    Serial.println(ro);
     if (ro == "off")
     {
       RainbowOn = 69;
@@ -312,8 +311,7 @@ void setup()
   Serial.begin(115200);
   FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, NUM_LEDS);
 
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
+
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED)
   {
