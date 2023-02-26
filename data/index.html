@@ -17,26 +17,23 @@
         <header class="mdl-layout__header">
             <div class="mdl-layout__header-row">
                 <!-- Title -->
-                <span class="mdl-layout-title">Phils Panel</span>
+                <span class="mdl-layout-title">Digitaluhr</span>
                 <div class="mdl-layout-spacer"></div>
-                <button class="mdl-button mdl-js-button mdl-button--icon customcolor" id="btn" value="1"
-                    onclick="Power()">
+                <button class="mdl-button mdl-js-button mdl-button--icon" id="power-button" onclick="togglePower()">
                     <i class="material-icons">power_settings_new</i>
                 </button>
-                <div class="mdl-layout-spacer"></div>
-                <p class="state">Modus: <span id="state">%STATE%</p>
-                </state>
-            </div>
-            <!-- Tabs -->
-            <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
-                <a href="#fixed-tab-1" class="mdl-layout__tab is-active">DigitalUhr</a>
-                <a href="#fixed-tab-2" class="mdl-layout__tab">to be continued</a>
             </div>
         </header>
+        <div class="mdl-layout__drawer">
+            <span class="mdl-layout-title">Digitaluhr</span>
+            <nav class="mdl-navigation">
+                <a class="mdl-navigation__link" onclick="changePage('fixed-tab-1')">Startseite</a>
+                <a class="mdl-navigation__link" onclick="changePage('fixed-tab-2')">Texteingabe</a>
+            </nav>
+        </div>
         <main class="mdl-layout__content">
             <section class="mdl-layout__tab-panel is-active" id="fixed-tab-1">
                 <div class="page-content">
-                    <!-- Your content goes here -->
                     <div class="mdl-grid">
                         <div class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--4dp mdl-cell--4-col-phone">
                             <div class="mdl-card__title">
@@ -48,12 +45,11 @@
                             <div class="wrapper">
                                 <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect title" for="checkbox-1">
                                     <input type="checkbox" id="checkbox-1" class="mdl-checkbox__input" unchecked
-                                        onclick="Rainbow()">
+                                        onclick="enableRainbow()">
                                     <span class="mdl-checkbox__label customcolor2">Farbwechsel</span>
                                 </label>
                                 <h6>Geschwindigkeit</h6>
-                                <input class="mdl-slider mdl-js-slider" id="slider" type="range" min="0" max="100"
-                                    value="15" tabindex="0" oninput="changeSpeed()">
+                                <input class="mdl-slider mdl-js-slider" id="rainbow_speed" type="range" min="0" max="100" value="15" tabindex="0" oninput="changeSpeed()">
                             </div>
                         </div>
                     </div>
@@ -61,7 +57,27 @@
             </section>
             <section class="mdl-layout__tab-panel" id="fixed-tab-2">
                 <div class="page-content">
-                    <!-- Your content goes here -->
+                    <div class="mdl-grid">
+                        <div class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--4dp mdl-cell--4-col-phone">
+                            <div class="mdl-card__title">
+                                <h6 class="title center">Bitte Lauftext eingeben!</h6>
+                            </div>
+                            <div class="wrapper">
+                                <form action="#">
+                                    <div class="mdl-textfield mdl-js-textfield">
+                                        <textarea class="mdl-textfield__input" type="text" rows="3" id="flow_text" style="color:white"></textarea>
+                                        <label class="mdl-textfield__label" for="sample5" style="color:white">Anzeigetext</label>
+                                        <span class="mdl-textfield__error" id="flow_text_error">Nur Text und Buschstaben sind erlaubt!</span>
+                                    </div>
+                                </form>
+                                <h6>Durchlaufgeschwindigkeit</h6>
+                                <input class="mdl-slider mdl-js-slider" id="flow_text_speed" type="range" min="0" max="100" value="50" tabindex="0" oninput="changeTextSpeed()">
+                                <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" style="margin:10% " onclick="setText()">
+                                    Text senden
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
         </main>
@@ -74,13 +90,14 @@
 <script>
     var gateway = `ws://${window.location.hostname}/ws`;
     var websocket;
+    var colorPicker = new iro.ColorPicker('#picker', {
+        borderWidth: 4
+    });
+
     window.addEventListener('load', onload);
 
     function onload(event) {
         initWebSocket();
-        initPowerButton();
-        initSlider();
-        initTicker();
     }
 
     function initWebSocket() {
@@ -88,7 +105,6 @@
         websocket = new WebSocket(gateway);
         websocket.onopen = onOpen;
         websocket.onclose = onClose;
-        websocket.onmessage = onMessage;
     }
 
     function onOpen(event) {
@@ -100,65 +116,67 @@
         setTimeout(initWebSocket, 2000);
     }
 
-    function onMessage(event) {
-        var state;
-        if (event.data == "An") {
-            state = "An";
-        }
-        else {
-            state = "Aus";
-        }
-        document.getElementById('state').innerHTML = state;
-
-    }
-
-    function onLoad(event) {
-        initWebSocket();
-        initButton();
-    }
-
-    var colorPicker = new iro.ColorPicker('#picker', { borderWidth: 4 });
-
     //=============================================================================
-    //                            Event listener                                 
+    //                            Input functions                                 
     //=============================================================================
-    colorPicker.on('input:end', function (color) {
+    colorPicker.on('input:end', function(color) {
         console.log(JSON.stringify(color.hsv));
-        websocket.send('col'+JSON.stringify(color.hsv));
+        websocket.send('col' + JSON.stringify(color.hsv));
 
     });
 
-    function Power() {
-        state = document.getElementById('btn').value;
-
-        if (state == 1) {
-            document.getElementById('btn').value = 0;
-            console.log('pw'+state);
-            websocket.send('pw'+0);
-        }
-        else {
-            document.getElementById('btn').value = 1;
-            console.log('pw'+state);
-            websocket.send('pw'+1);
-        }
+    function togglePower() {
+        button = document.getElementById('power-button');
+        websocket.send("pw")
     }
 
     function changeSpeed() {
-        speed = document.getElementById("slider").value;
-        console.log(speed);
+        speed = document.getElementById("rainbow_speed").value;
+        console.log("Rainbow speed: " + speed);
         websocket.send("sl" + speed);
     }
 
-    function Rainbow() {
+    function enableRainbow() {
         stateCheck = document.getElementById("checkbox-1").checked;
         if (stateCheck == 1) {
             console.log("Rainbow on");
             websocket.send("Ron");
-        }
-        else {
+        } else {
             console.log("Rainbow off");
             websocket.send("Roff");
         }
+    }
+
+    //text input page functions
+
+    function changeTextSpeed(){
+        textSpeed = document.getElementById("flow_text_speed").value;
+        console.log("Flow text speed: " + textSpeed);
+        websocket.send("fs" + speed)
+    }
+
+    function setText(){
+        text = document.getElementById("flow_text").value;
+        flowTextErrorState = document.getElementById("flow_text_error")
+        if(/^[a-zA-Z0-9 ]*$/.test(text)){
+            flowTextErrorState.style.visibility = "hidden"
+            console.log("Flow Text: " + text.toUpperCase())
+            websocket.send("ft:" + text.toUpperCase())
+        }
+        else{
+            flowTextErrorState.style.visibility = "visible"
+            console.log("Text has to match regex: [a-zA-Z0-9]")
+        }
+    }
+
+    //segment changes
+    function changePage(id) {
+        desiredPage = document.getElementById(id)
+        siblings = desiredPage.parentNode.children
+        for (let sibling of siblings) {
+            sibling.style.display = "none"
+        }
+        desiredPage.style.display = "block"
     }
 
     //upload FS cmd: pio run -t uploadfs
