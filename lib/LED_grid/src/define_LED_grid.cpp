@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <vector>
+#include <define_LED_grid.h>
 using namespace std;
 
 // Setup for different grids on 7x15 board
@@ -15,46 +16,6 @@ byte grid[7][15] = {
 byte border[] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
     90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104};
-
-
-vector<vector<byte>>grid_for_content(byte pos){
-    vector<vector<byte>> grid_array;
-
-    for (int h = 0; h < 5; h++){
-
-        for (int w = 0; w < 3; w++){
-            grid_array[h][w] = grid[h-1][w+pos];
-        }
-    }
-    return grid_array;
-}
-
-
-// distance for clock
-byte pos_L=0;
-byte pos_LM=4;
-byte pos_RM=8;
-byte pos_R=12;
-
-// defined grids for displaying time
-vector<vector<byte>>gridL = grid_for_content(pos_L);
-vector<vector<byte>>gridLM = grid_for_content(pos_LM);
-vector<vector<byte>>gridRM = grid_for_content(pos_RM);
-vector<vector<byte>>gridR = grid_for_content(pos_R);
-
-// draw symbols into grid
-vector<byte> drawer(bool symbol[5][3], vector<vector<byte>>grid_to_draw){
-    vector<byte> symbol_on_grid_vector = {};
-    
-    for (int i=0; i<6; i++){
-        for (int l=0; l<3; l++){
-            if (symbol[i][l] == 1){
-                symbol_on_grid_vector.push_back(grid_to_draw[i][l]);
-            }
-        }
-    }
-    return symbol_on_grid_vector;       // returns all bytes of grid, that shall light up
-}
 
 // Alphabet
 bool A[5][3] = {
@@ -313,9 +274,51 @@ bool eight[5][3] = {
     {1,1,1}
 };
 bool nine[5][3] = {
-    {1,1,1},
+    {0,1,1},
     {1,0,1},
     {1,1,1},
     {0,0,1},
     {1,1,1}
 };
+
+
+// distance for clock
+byte pos_L=0;
+byte pos_LM=4;
+byte pos_RM=8;
+byte pos_R=12;
+
+
+vector<vector<byte>>grid_for_content(byte pos){
+    vector<vector<byte>> grid_array(5, vector<byte>(3));
+
+    for (int h = 0; h < 5; h++){
+
+        for (int w = 0; w < 3; w++){
+            grid_array[h][w] = grid[h+1][w+pos];
+        }
+    }
+    return grid_array;
+}
+
+// defined grids for displaying time
+vector<vector<byte>> gridL = grid_for_content(pos_L);
+vector<vector<byte>> gridLM = grid_for_content(pos_LM);
+vector<vector<byte>> gridRM = grid_for_content(pos_RM);
+vector<vector<byte>> gridR = grid_for_content(pos_R);
+
+// draw symbols into grid
+vector<byte> drawer(bool symbol[5][3], vector<vector<byte>>grid_to_draw){
+    vector<byte> symbol_on_grid_vector;
+    grid_to_draw.resize(5, vector<byte>(3));
+    
+    for (int i=0; i<5; i++){
+        for (int l=0; l<3; l++){
+            if (symbol[i][l] == true){
+                symbol_on_grid_vector.push_back(grid_to_draw[i][l]);
+            }
+        }
+    }
+
+    return symbol_on_grid_vector;       // returns all bytes of grid, that shall light up
+}

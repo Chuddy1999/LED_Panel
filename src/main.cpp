@@ -1,3 +1,5 @@
+#include <credentials.h>
+#include <define_LED_grid.h>
 #include <Arduino.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
@@ -7,14 +9,14 @@
 #include <FastLED.h>
 #include <TimeLib.h>
 #include <LittleFS.h>
+#include <AsyncElegantOTA.h>
 
 #include <iostream>
 #include <string.h>
 #include <array>
 #include <vector>
 
-#include "credentials.h"
-#include "define_LED_grid.h"
+#include <define_LED_grid.h>
 
 
 // Setup NetworkTimeProtocol Client
@@ -102,7 +104,8 @@ int getTimeOffset()
 void instantOn(vector<byte>symbol)
 {
   int len = symbol.size();
-  for (int i = 1; i < len; i++)
+
+  for (int i = 0; i < len; i++)
   {
     leds[symbol[i]] = CHSV(color, saturation, brightn);
   }
@@ -113,6 +116,7 @@ void instantOn(vector<byte>symbol)
 
 void setTime(int time_piece, vector<vector<byte>>grid_position){
   vector<byte>symbol;
+
   switch(time_piece){
     case 0:
       symbol = drawer(null, grid_position);
@@ -146,10 +150,6 @@ void setTime(int time_piece, vector<vector<byte>>grid_position){
       break;
   }
   instantOn(symbol);
-
-  for (byte i: symbol){
-    Serial.println(i);
-  }
 }
 
 void getTime()
@@ -307,8 +307,8 @@ String processor(const String &var)
 
 void setup()
 {
+  Serial.begin(9600);
   LittleFS.begin();
-  Serial.begin(115200);
   FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, NUM_LEDS);
 
 
@@ -332,6 +332,7 @@ void setup()
   server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(LittleFS, "/style.css", "text/css"); });
 
+  AsyncElegantOTA.begin(&server);
   server.begin();
 
   timeClient.begin();

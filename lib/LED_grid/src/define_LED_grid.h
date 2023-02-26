@@ -7,8 +7,7 @@ extern byte grid[7][15];
 
 extern byte border[30];
 
-
-extern vector<vector<byte>>grid_for_content(byte pos);
+vector<vector<byte>>grid_for_content(byte pos);
 
 // distance for clock
 extern byte pos_L;
@@ -23,7 +22,7 @@ extern vector<vector<byte>>gridRM;
 extern vector<vector<byte>>gridR;
 
 // draw symbols into grid
-extern vector<byte> drawer(bool symbol[5][3], vector<vector<byte>>grid_to_draw);
+vector<byte> drawer(bool symbol[5][3], vector<vector<byte>>grid_to_draw);
 
 // Alphabet
 extern bool A[5][3];
