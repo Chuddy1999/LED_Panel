@@ -1,3 +1,5 @@
+#include <credentials.h>
+#include <define_LED_grid.h>
 #include <Arduino.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
@@ -7,19 +9,22 @@
 #include <FastLED.h>
 #include <TimeLib.h>
 #include <LittleFS.h>
+#include <AsyncElegantOTA.h>
 
 #include <iostream>
 #include <string.h>
 #include <array>
+#include <vector>
 
-#include "credentials.cpp"
+#include <define_LED_grid.h>
+
 
 // Setup NetworkTimeProtocol Client
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "de.pool.ntp.org");
 
 AsyncWebServer server(80);
-AsyncWebSocket ws("/ws");
+AsyncWebSocket websocket("/ws");
 String header;
 
 // Setup FastLED
@@ -33,101 +38,17 @@ int16_t color = 0;
 int16_t saturation = 180;
 uint8_t fadeSpeed = 15;
 byte RainbowOn = 0;
+byte mode = 0;
 
-// Setup for different grids on 7x15 board
-byte grid[7][15] = {
-    {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14},
-    {29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15},
-    {30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44},
-    {59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45},
-    {60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74},
-    {89, 88, 87, 86, 85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75},
-    {90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104}};
 
-byte border[] = {
-    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-    90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104};
-
-byte gridL[] = {
-    29, 28, 27,
-    30, 31, 32,
-    59, 58, 57,
-    60, 61, 62,
-    89, 88, 87};
-
-byte gridLM[] = {
-    25,
-    24,
-    23,
-    34,
-    35,
-    36,
-    55,
-    54,
-    53,
-    64,
-    65,
-    66,
-    85,
-    84,
-    83,
-};
-
-byte gridRM[] = {
-    21,
-    20,
-    19,
-    38,
-    39,
-    40,
-    51,
-    50,
-    49,
-    68,
-    69,
-    70,
-    81,
-    80,
-    79,
-};
-
-byte gridR[] = {
-    17, 16, 15,
-    42, 43, 44,
-    47, 46, 45,
-    72, 73, 74,
-    77, 76, 75};
-
-// Setup Numbers for 5x3 Grids
-byte Zero[] = {13, 0, 1, 2, 3, 6, 9, 12, 13, 14, 11, 8, 5};
-byte One[] = {7, 2, 4, 5, 8, 11, 14};
-byte Two[] = {12, 0, 1, 2, 5, 8, 7, 6, 9, 12, 13, 14};
-byte Three[] = {12, 0, 1, 2, 5, 6, 7, 8, 11, 12, 13, 14};
-byte Four[] = {10, 0, 3, 6, 7, 8, 11, 14, 2, 5};
-byte Five[] = {12, 0, 1, 2, 3, 6, 7, 8, 11, 12, 13, 14};
-byte Six[] = {12, 0, 3, 6, 9, 12, 13, 14, 11, 8, 7, 1};
-byte Seven[] = {8, 0, 1, 2, 5, 8, 11, 14};
-byte Eight[] = {14, 0, 1, 2, 3, 5, 6, 7, 8, 9, 11, 12, 13, 14};
-byte Nine[] = {12, 0, 1, 2, 3, 5, 6, 7, 8, 11, 13, 14};
-
-byte zeroT;
-byte oneT;
-byte twoT;
-byte threeT;
-byte fourT;
-byte fiveT;
-byte sixT;
-byte sevenT;
-byte eightT;
-byte nineT;
 
 int Hour;
 int minu;
 int sec;
-int L;
-int LM;
-int RM;
-int R;
+int val_L;
+int val_LM;
+int val_RM;
+int val_R;
 
 // Date
 bool isLastSundayOver(int weekday, int day)
@@ -180,109 +101,55 @@ int getTimeOffset()
 }
 
 // Functions
-void instantOn(byte NumberGrid[], byte Number[])
+void instantOn(vector<byte>symbol)
 {
-  int len = Number[0];
-  for (int i = 1; i < len; i++)
+  int len = symbol.size();
+
+  for (int i = 0; i < len; i++)
   {
-    leds[NumberGrid[Number[i]]] = CHSV(color, saturation, brightn);
+    leds[symbol[i]] = CHSV(color, saturation, brightn);
   }
 }
 
-void fadeIn(byte NumberGrid[], byte Number[])
-{
-  int len = Number[0];
-  for (int b = 15; b <= brightn; b++)
-  {
-    for (int i = 1; i < len; i++)
-    {
-      leds[NumberGrid[Number[i]]] = CHSV(color, saturation,b);
-    }
-    FastLED.show();
-    delay(5);
+/* __________ code to display time __________ */
+
+
+void setTime(int time_piece, vector<vector<byte>>grid_position){
+  vector<byte>symbol;
+
+  switch(time_piece){
+    case 0:
+      symbol = drawer(null, grid_position);
+      break;
+    case 1:
+      symbol = drawer(one, grid_position);
+      break;
+    case 2:
+      symbol = drawer(two, grid_position);
+      break;
+    case 3:
+      symbol = drawer(three, grid_position);
+      break;
+    case 4:
+      symbol = drawer(four, grid_position);
+      break;
+    case 5:
+      symbol = drawer(five, grid_position);
+      break;
+    case 6:
+      symbol = drawer(six, grid_position);
+      break;
+    case 7:
+      symbol = drawer(seven, grid_position);
+      break;
+    case 8:
+      symbol = drawer(eight, grid_position);
+      break;
+    case 9:
+      symbol = drawer(nine, grid_position);
+      break;
   }
-}
-
-void fadeOut(byte NumberGrid[], byte Number[])
-{
-  int len = Number[0];
-  for (int f = brightn; f >= 15; f--)
-  {
-    for (int i = 1; i < len; i++)
-    {
-      leds[NumberGrid[Number[i]]] = CHSV(color, saturation, f);
-    }
-    FastLED.show();
-    delay(5);
-  }
-  for (int i = 1; i < len; i++)
-  {
-    leds[NumberGrid[Number[i]]] = CHSV(color, saturation, 0);
-  }
-}
-
-void borderTimer()
-{
-}
-
-void gridTest()
-{
-  for (int r = 0; r < 7; r++)
-  {
-    for (int c = 0; c < 15; c++)
-    {
-      leds[grid[r][c]] = CRGB::RosyBrown;
-      FastLED.show();
-      delay(50);
-      FastLED.clear();
-    }
-  }
-}
-
-void setTime(byte gridTime[], int timePiece)
-{
-  switch (timePiece)
-  {
-  case 0:
-    instantOn(gridTime, Zero);
-    break;
-
-  case 1:
-    instantOn(gridTime, One);
-    break;
-
-  case 2:
-    instantOn(gridTime, Two);
-    break;
-
-  case 3:
-    instantOn(gridTime, Three);
-    break;
-
-  case 4:
-    instantOn(gridTime, Four);
-    break;
-
-  case 5:
-    instantOn(gridTime, Five);
-    break;
-
-  case 6:
-    instantOn(gridTime, Six);
-    break;
-
-  case 7:
-    instantOn(gridTime, Seven);
-    break;
-
-  case 8:
-    instantOn(gridTime, Eight);
-    break;
-
-  case 9:
-    instantOn(gridTime, Nine);
-    break;
-  }
+  instantOn(symbol);
 }
 
 void getTime()
@@ -293,15 +160,17 @@ void getTime()
   minu = timeClient.getMinutes();
   sec = timeClient.getSeconds();
 
-  L = Hour / 10;
-  LM = Hour % 10;
-  RM = minu / 10;
-  R = minu % 10;
+  val_L = Hour / 10;
+  setTime(val_L,gridL);
 
-  setTime(gridL, L);
-  setTime(gridLM, LM);
-  setTime(gridRM, RM);
-  setTime(gridR, R);
+  val_LM = Hour % 10;
+  setTime(val_LM, gridLM);
+
+  val_RM = minu / 10;
+  setTime(val_RM, gridRM);
+
+  val_R = minu % 10;
+  setTime(val_R, gridR);
 }
 
 void rainbow()
@@ -315,6 +184,12 @@ void rainbow()
     color = color + 1;
   }
 }
+
+/* __________ code to display text __________ */
+
+
+
+
 
 void handleWSData(String cutData)
 {
@@ -355,9 +230,6 @@ void handleWSData(String cutData)
       {
         HSV[delLoop] = cutData.substring(del0 + 1, del2);
       }
-      Serial.println(HSV[0]);
-      Serial.println(HSV[1]);
-      Serial.println(HSV[2]);
 
       color = map(HSV[0].toInt(), 0, 360, 0, 255);
       saturation = map(HSV[1].toInt(), 0, 100, 0, 255);
@@ -370,10 +242,8 @@ void handleWSData(String cutData)
   else if (testsl == 1)
   {
     String sl = cutData.substring(2);
-    Serial.println(sl);
     sint8_t slinverted = sl.toInt() - 100;
     slinverted = -1 * slinverted;
-    Serial.println(slinverted);
     fadeSpeed = slinverted;
   }
 
@@ -381,7 +251,6 @@ void handleWSData(String cutData)
   else if (testpw == 1)
   {
     String pw = cutData.substring(2);
-    Serial.println(pw);
     if (pw == "0")
     {
       brightn = 0;
@@ -396,7 +265,6 @@ void handleWSData(String cutData)
   else if (testro == 1)
   {
     String ro = cutData.substring(1);
-    Serial.println(ro);
     if (ro == "off")
     {
       RainbowOn = 69;
@@ -439,12 +307,11 @@ String processor(const String &var)
 
 void setup()
 {
+  Serial.begin(9600);
   LittleFS.begin();
-  Serial.begin(115200);
   FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, NUM_LEDS);
 
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
+
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED)
   {
@@ -457,14 +324,15 @@ void setup()
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
-  ws.onEvent(onWsEvent);
-  server.addHandler(&ws);
+  websocket.onEvent(onWsEvent);
+  server.addHandler(&websocket);
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(LittleFS, "/index.html", String(), false, processor); });
   server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(LittleFS, "/style.css", "text/css"); });
 
+  AsyncElegantOTA.begin(&server);
   server.begin();
 
   timeClient.begin();
@@ -474,9 +342,16 @@ void setup()
 void loop()
 {
   // put your main code here, to run repeatedly:
-  timeClient.setTimeOffset(getTimeOffset());
-  timeClient.update();
-  getTime();
+  if (mode == 0) {    // display time mode
+    timeClient.setTimeOffset(getTimeOffset());
+    timeClient.update();
+
+    getTime();
+  }
+  else if (mode == 1){    // display text mode
+
+  }
+
   rainbow();
 
   FastLED.show();
