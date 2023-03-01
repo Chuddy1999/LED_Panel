@@ -67,7 +67,7 @@
                                     <div class="mdl-textfield mdl-js-textfield">
                                         <textarea class="mdl-textfield__input" type="text" rows="3" id="flow_text" style="color:white"></textarea>
                                         <label class="mdl-textfield__label" for="sample5" style="color:white">Anzeigetext</label>
-                                        <span class="mdl-textfield__error" id="flow_text_error">Nur Text und Buschstaben sind erlaubt!</span>
+                                        <span class="mdl-textfield__error" id="flow_text_error">Nur Text und Buchstaben sind erlaubt!</span>
                                     </div>
                                 </form>
                                 <h6>Durchlaufgeschwindigkeit</h6>
@@ -121,29 +121,29 @@
     //=============================================================================
     colorPicker.on('input:end', function(color) {
         console.log(JSON.stringify(color.hsv));
-        websocket.send('col' + JSON.stringify(color.hsv));
+        websocket.send('col;' + JSON.stringify(color.hsv));
 
     });
 
     function togglePower() {
         button = document.getElementById('power-button');
-        websocket.send("pw")
+        websocket.send("pw;")
     }
 
     function changeSpeed() {
         speed = document.getElementById("rainbow_speed").value;
         console.log("Rainbow speed: " + speed);
-        websocket.send("sl" + speed);
+        websocket.send("sl;" + speed);
     }
 
     function enableRainbow() {
         stateCheck = document.getElementById("checkbox-1").checked;
         if (stateCheck == 1) {
             console.log("Rainbow on");
-            websocket.send("Ron");
+            websocket.send("R;on");
         } else {
             console.log("Rainbow off");
-            websocket.send("Roff");
+            websocket.send("R;off");
         }
     }
 
@@ -152,7 +152,7 @@
     function changeTextSpeed(){
         textSpeed = document.getElementById("flow_text_speed").value;
         console.log("Flow text speed: " + textSpeed);
-        websocket.send("fs" + speed)
+        websocket.send("fs;" + speed)
     }
 
     function setText(){
@@ -161,7 +161,7 @@
         if(/^[a-zA-Z0-9 ]*$/.test(text)){
             flowTextErrorState.style.visibility = "hidden"
             console.log("Flow Text: " + text.toUpperCase())
-            websocket.send("ft:" + text.toUpperCase())
+            websocket.send("ft;" + text.toUpperCase())
         }
         else{
             flowTextErrorState.style.visibility = "visible"

@@ -17,6 +17,7 @@
 #include <vector>
 
 #include <define_LED_grid.h>
+#include <text_logic.h>
 
 
 // Setup NetworkTimeProtocol Client
@@ -38,7 +39,7 @@ int16_t color = 0;
 int16_t saturation = 180;
 uint8_t fadeSpeed = 15;
 byte RainbowOn = 0;
-byte mode = 0;
+byte mode = 1;
 
 
 
@@ -193,21 +194,25 @@ void rainbow()
 
 void handleWSData(String cutData)
 {
-  String idcp = "col";
-  String idsl = "sl";
-  String idpw = "pw";
-  String idro = "Ro";
+  String idcp = "col;";
+  String idsl = "sl;";
+  String idpw = "pw;";
+  String idro = "R;o";
+  String idfs = "fs;";
+  String idft = "ft;";
 
   bool testcp = strstr(cutData.c_str(), idcp.c_str());
   bool testsl = strstr(cutData.c_str(), idsl.c_str());
   bool testpw = strstr(cutData.c_str(), idpw.c_str());
   bool testro = strstr(cutData.c_str(), idro.c_str());
+  bool testfs = strstr(cutData.c_str(), idfs.c_str());
+  bool testft = strstr(cutData.c_str(), idft.c_str());
 
   // user control LED Panel
   // color picker
   if (testcp == 1)
   {
-    cutData = cutData.substring(7);
+    cutData = cutData.substring(8);
     Serial.println(cutData);
     byte del0;
     byte del1;
@@ -241,7 +246,7 @@ void handleWSData(String cutData)
   // rainbow fade slider
   else if (testsl == 1)
   {
-    String sl = cutData.substring(2);
+    String sl = cutData.substring(3);
     sint8_t slinverted = sl.toInt() - 100;
     slinverted = -1 * slinverted;
     fadeSpeed = slinverted;
@@ -250,7 +255,7 @@ void handleWSData(String cutData)
   // Power control
   else if (testpw == 1)
   {
-    String pw = cutData.substring(2);
+    String pw = cutData.substring(3);
     if (pw == "0")
     {
       brightn = 0;
@@ -264,7 +269,7 @@ void handleWSData(String cutData)
   // Rainbow on/off
   else if (testro == 1)
   {
-    String ro = cutData.substring(1);
+    String ro = cutData.substring(2);
     if (ro == "off")
     {
       RainbowOn = 69;
@@ -273,6 +278,20 @@ void handleWSData(String cutData)
     {
       RainbowOn = 1;
     }
+  }
+
+  //Flowtext
+  else if (testfs == 1)
+  {
+    String ro = cutData.substring(2);
+    
+  }
+
+  //Flowtext speed
+  else if (testft == 1)
+  {
+    String ro = cutData.substring(2);
+    
   }
 }
 
@@ -349,7 +368,7 @@ void loop()
     getTime();
   }
   else if (mode == 1){    // display text mode
-
+    disassemble();
   }
 
   rainbow();
