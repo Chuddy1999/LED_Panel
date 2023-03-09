@@ -19,6 +19,10 @@
 #include <define_LED_grid.h>
 #include <text_logic.h>
 
+using namespace std;
+
+// string test = " FEUERBACHER FEUDAL ERFOLG SKALIERT ZUR ISS ";
+String text = " FEUDAL ";
 
 // Setup NetworkTimeProtocol Client
 WiFiUDP ntpUDP;
@@ -41,8 +45,6 @@ uint8_t fadeSpeed = 15;
 byte RainbowOn = 0;
 byte mode = 1;
 
-
-
 int Hour;
 int minu;
 int sec;
@@ -50,6 +52,8 @@ int val_L;
 int val_LM;
 int val_RM;
 int val_R;
+
+vector<byte> text_print_symbol;
 
 // Date
 bool isLastSundayOver(int weekday, int day)
@@ -102,7 +106,7 @@ int getTimeOffset()
 }
 
 // Functions
-void instantOn(vector<byte>symbol)
+void instantOn(vector<byte> symbol)
 {
   int len = symbol.size();
 
@@ -114,41 +118,42 @@ void instantOn(vector<byte>symbol)
 
 /* __________ code to display time __________ */
 
+void setTime(int time_piece, vector<vector<byte>> grid_position)
+{
+  vector<byte> symbol;
 
-void setTime(int time_piece, vector<vector<byte>>grid_position){
-  vector<byte>symbol;
-
-  switch(time_piece){
-    case 0:
-      symbol = drawer(null, grid_position);
-      break;
-    case 1:
-      symbol = drawer(one, grid_position);
-      break;
-    case 2:
-      symbol = drawer(two, grid_position);
-      break;
-    case 3:
-      symbol = drawer(three, grid_position);
-      break;
-    case 4:
-      symbol = drawer(four, grid_position);
-      break;
-    case 5:
-      symbol = drawer(five, grid_position);
-      break;
-    case 6:
-      symbol = drawer(six, grid_position);
-      break;
-    case 7:
-      symbol = drawer(seven, grid_position);
-      break;
-    case 8:
-      symbol = drawer(eight, grid_position);
-      break;
-    case 9:
-      symbol = drawer(nine, grid_position);
-      break;
+  switch (time_piece)
+  {
+  case 0:
+    symbol = drawer(null, grid_position);
+    break;
+  case 1:
+    symbol = drawer(one, grid_position);
+    break;
+  case 2:
+    symbol = drawer(two, grid_position);
+    break;
+  case 3:
+    symbol = drawer(three, grid_position);
+    break;
+  case 4:
+    symbol = drawer(four, grid_position);
+    break;
+  case 5:
+    symbol = drawer(five, grid_position);
+    break;
+  case 6:
+    symbol = drawer(six, grid_position);
+    break;
+  case 7:
+    symbol = drawer(seven, grid_position);
+    break;
+  case 8:
+    symbol = drawer(eight, grid_position);
+    break;
+  case 9:
+    symbol = drawer(nine, grid_position);
+    break;
   }
   instantOn(symbol);
 }
@@ -162,7 +167,7 @@ void getTime()
   sec = timeClient.getSeconds();
 
   val_L = Hour / 10;
-  setTime(val_L,gridL);
+  setTime(val_L, gridL);
 
   val_LM = Hour % 10;
   setTime(val_LM, gridLM);
@@ -188,12 +193,9 @@ void rainbow()
 
 /* __________ code to display text __________ */
 
-
-
-
-
 void handleWSData(String cutData)
 {
+  Serial.println(cutData);
   String idcp = "col;";
   String idsl = "sl;";
   String idpw = "pw;";
@@ -210,7 +212,7 @@ void handleWSData(String cutData)
 
   // user control LED Panel
   // color picker
-  if (testcp == 1)
+  if (testcp)
   {
     cutData = cutData.substring(8);
     Serial.println(cutData);
@@ -239,12 +241,11 @@ void handleWSData(String cutData)
       color = map(HSV[0].toInt(), 0, 360, 0, 255);
       saturation = map(HSV[1].toInt(), 0, 100, 0, 255);
       brightn = map(HSV[2].toInt(), 0, 100, 0, 255);
-      
     }
   }
 
   // rainbow fade slider
-  else if (testsl == 1)
+  else if (testsl)
   {
     String sl = cutData.substring(3);
     sint8_t slinverted = sl.toInt() - 100;
@@ -253,10 +254,9 @@ void handleWSData(String cutData)
   }
 
   // Power control
-  else if (testpw == 1)
+  else if (testpw)
   {
-    String pw = cutData.substring(3);
-    if (pw == "0")
+    if (brightn > 0)
     {
       brightn = 0;
     }
@@ -267,7 +267,7 @@ void handleWSData(String cutData)
   }
 
   // Rainbow on/off
-  else if (testro == 1)
+  else if (testro)
   {
     String ro = cutData.substring(2);
     if (ro == "off")
@@ -280,18 +280,16 @@ void handleWSData(String cutData)
     }
   }
 
-  //Flowtext
-  else if (testfs == 1)
+  // Flowtext
+  else if (testft)
   {
-    String ro = cutData.substring(2);
-    
+    text = cutData.substring(2);
   }
 
-  //Flowtext speed
-  else if (testft == 1)
+  // Flowtext speed
+  else if (testfs)
   {
     String ro = cutData.substring(2);
-    
   }
 }
 
@@ -330,7 +328,6 @@ void setup()
   LittleFS.begin();
   FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, NUM_LEDS);
 
-
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED)
   {
@@ -361,20 +358,22 @@ void setup()
 void loop()
 {
   // put your main code here, to run repeatedly:
-  if (mode == 0) {    // display time mode
+  if (mode == 0)
+  { // display time mode
     timeClient.setTimeOffset(getTimeOffset());
     timeClient.update();
 
     getTime();
   }
-  else if (mode == 1){    // display text mode
-    disassemble();
+  else if (mode == 1)
+  { // display text mode
+    text_print_symbol = disassemble(text);
   }
 
   rainbow();
 
-  FastLED.show();
-  delay(fadeSpeed);
-  FastLED.clear();
-  delay(fadeSpeed);
+  // FastLED.show();
+  // delay(fadeSpeed);
+  // FastLED.clear();
+  // delay(fadeSpeed);
 }

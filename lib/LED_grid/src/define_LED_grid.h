@@ -7,7 +7,8 @@ extern byte grid[7][15];
 
 extern byte border[30];
 
-vector<vector<byte>>grid_for_content(byte pos);
+vector<vector<byte>>grid_for_content(int pos);
+vector<vector<byte>>grid_for_flow_content(int pos);
 
 // distance for clock
 extern byte pos_L;
@@ -22,46 +23,46 @@ extern vector<vector<byte>>gridRM;
 extern vector<vector<byte>>gridR;
 
 // draw symbols into grid
-vector<byte> drawer(bool symbol[5][3], vector<vector<byte>>grid_to_draw);
+vector<byte> drawer(vector<vector<bool>> symbol, vector<vector<byte>>grid_to_draw);
 
 // Alphabet
-extern bool A[5][3];
-extern bool B[5][3];
-extern bool C[5][3];
-extern bool D[5][3];
-extern bool E[5][3];
-extern bool F[5][3];
-extern bool G[5][3];
-extern bool H[5][3];
-extern bool I[5][3];
-extern bool J[5][3];
-extern bool K[5][3];
-extern bool L[5][3];
-extern bool M[5][3];
-extern bool N[5][3];
-extern bool O[5][3];
-extern bool P[5][3];
-extern bool Q[5][3];
-extern bool R[5][3];
-extern bool S[5][3];
-extern bool T[5][3];
-extern bool U[5][3];
-extern bool V[5][3];
-extern bool W[5][3];
-extern bool X[5][3];
-extern bool Y[5][3];
-extern bool Z[5][3];
+extern vector<vector<bool>> A;
+extern vector<vector<bool>> B;
+extern vector<vector<bool>> C;
+extern vector<vector<bool>> D;
+extern vector<vector<bool>> E;
+extern vector<vector<bool>> F;
+extern vector<vector<bool>> G;
+extern vector<vector<bool>> H;
+extern vector<vector<bool>> I;
+extern vector<vector<bool>> J;
+extern vector<vector<bool>> K;
+extern vector<vector<bool>> L;
+extern vector<vector<bool>> M;
+extern vector<vector<bool>> N;
+extern vector<vector<bool>> O;
+extern vector<vector<bool>> P;
+extern vector<vector<bool>> Q;
+extern vector<vector<bool>> R;
+extern vector<vector<bool>> S;
+extern vector<vector<bool>> T;
+extern vector<vector<bool>> U;
+extern vector<vector<bool>> V;
+extern vector<vector<bool>> W;
+extern vector<vector<bool>> X;
+extern vector<vector<bool>> Y;
+extern vector<vector<bool>> Z;
 
-extern bool space[5][3];
+extern vector<vector<bool>> space;
 
 
-extern bool null[5][3];
-extern bool one[5][3];
-extern bool two[5][3];
-extern bool three[5][3];
-extern bool four[5][3];
-extern bool five[5][3];
-extern bool six[5][3];
-extern bool seven[5][3];
-extern bool eight[5][3];
-extern bool nine[5][3];
+extern vector<vector<bool>> null;
+extern vector<vector<bool>> one;
+extern vector<vector<bool>> two;
+extern vector<vector<bool>> three;
+extern vector<vector<bool>> four;
+extern vector<vector<bool>> five;
+extern vector<vector<bool>> six;
+extern vector<vector<bool>> seven;
+extern vector<vector<bool>> eight;
+extern vector<vector<bool>> nine;
