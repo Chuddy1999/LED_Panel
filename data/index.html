@@ -73,8 +73,6 @@
                                         <span class="mdl-textfield__error" id="flow_text_error">Nur Buchstaben und Zahlen sind erlaubt!</span>
                                     </div>
                                 </form>
-                                <h6>Durchlaufgeschwindigkeit</h6>
-                                <input class="mdl-slider mdl-js-slider" id="flow_text_speed" type="range" min="0" max="100" value="50" tabindex="0" oninput="changeTextSpeed()">
                                 <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" style="margin:10% " onclick="setText()">
                                     Text senden
                                 </button>
@@ -157,16 +155,10 @@
 
     //text input page functions
 
-    function changeTextSpeed(){
-        textSpeed = document.getElementById("flow_text_speed").value;
-        console.log("Flow text speed: " + textSpeed);
-        websocket.send("fs;" + speed)
-    }
-
     function setText(){
         text = document.getElementById("flow_text").value;
         flowTextErrorState = document.getElementById("flow_text_error")
-        if(/^[a-zA-Z0-9 ]*$/.test(text)){
+        if(/^[a-zA-Z0-9 äöüÄÖÜ]*$/.test(text)){
             flowTextErrorState.style.visibility = "hidden"
             console.log("Flow Text: " + text.toUpperCase())
             websocket.send("ft;" + text.toUpperCase())
