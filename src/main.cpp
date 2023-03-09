@@ -43,7 +43,7 @@ int16_t color = 0;
 int16_t saturation = 180;
 uint8_t fadeSpeed = 15;
 byte RainbowOn = 0;
-byte mode = 1;
+byte mode = 0;
 
 int Hour;
 int minu;
@@ -202,6 +202,7 @@ void handleWSData(String cutData)
   String idro = "R;o";
   String idfs = "fs;";
   String idft = "ft;";
+  String idmo = "md;";
 
   bool testcp = strstr(cutData.c_str(), idcp.c_str());
   bool testsl = strstr(cutData.c_str(), idsl.c_str());
@@ -209,6 +210,7 @@ void handleWSData(String cutData)
   bool testro = strstr(cutData.c_str(), idro.c_str());
   bool testfs = strstr(cutData.c_str(), idfs.c_str());
   bool testft = strstr(cutData.c_str(), idft.c_str());
+  bool testmo = strstr(cutData.c_str(), idmo.c_str());
 
   // user control LED Panel
   // color picker
@@ -291,6 +293,19 @@ void handleWSData(String cutData)
   {
     String ro = cutData.substring(2);
   }
+
+  // Switch mode
+  else if (testmo)
+  {
+    if (mode == 1)
+    {
+      mode = 0;
+    }
+    else
+    {
+      mode = 1;
+    }
+  }
 }
 
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len)
@@ -364,6 +379,7 @@ void loop()
     timeClient.update();
 
     getTime();
+    FastLED.show();
   }
   else if (mode == 1)
   { // display text mode

@@ -19,6 +19,9 @@
                 <!-- Title -->
                 <span class="mdl-layout-title">Digitaluhr</span>
                 <div class="mdl-layout-spacer"></div>
+                <button class="mdl-button mdl-js-button mdl-button--icon" id="mode-button" onclick="toggleMode()">
+                    <i class="material-icons">swap_horiz</i>
+                </button>
                 <button class="mdl-button mdl-js-button mdl-button--icon" id="power-button" onclick="togglePower()">
                     <i class="material-icons">power_settings_new</i>
                 </button>
@@ -145,6 +148,11 @@
             console.log("Rainbow off");
             websocket.send("R;off");
         }
+    }
+
+    function toggleMode() {
+        console.log("toggle mode");
+        websocket.send("md;");
     }
 
     //text input page functions
