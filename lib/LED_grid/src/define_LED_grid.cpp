@@ -220,6 +220,31 @@ vector<vector<bool>>space = {
     {false,false,false}
 };
 
+vector<vector<bool>> AE = {
+    {true,false,true},
+    {false,true,false},
+    {true,false,true},
+    {true,false,true},
+    {true,false,true}
+};
+
+vector<vector<bool>> OE = {
+    {true,false,true},
+    {false,true,false},
+    {true,false,true},
+    {true,false,true},
+    {false,true,false}
+};
+
+vector<vector<bool>>UE = {
+    {true,false,true},
+    {false,false,false},
+    {true,false,true},
+    {true,false,true},
+    {true,true,true}
+};
+
+
 
 vector<vector<bool>>null = {
     {true,true,true},

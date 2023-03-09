@@ -22,7 +22,7 @@
 using namespace std;
 
 // string test = " FEUERBACHER FEUDAL ERFOLG SKALIERT ZUR ISS ";
-String text = " FEUDAL ";
+String text = "TIMESTREAM 715";
 
 // Setup NetworkTimeProtocol Client
 WiFiUDP ntpUDP;
@@ -200,7 +200,6 @@ void handleWSData(String cutData)
   String idsl = "sl;";
   String idpw = "pw;";
   String idro = "R;o";
-  String idfs = "fs;";
   String idft = "ft;";
   String idmo = "md;";
 
@@ -208,7 +207,6 @@ void handleWSData(String cutData)
   bool testsl = strstr(cutData.c_str(), idsl.c_str());
   bool testpw = strstr(cutData.c_str(), idpw.c_str());
   bool testro = strstr(cutData.c_str(), idro.c_str());
-  bool testfs = strstr(cutData.c_str(), idfs.c_str());
   bool testft = strstr(cutData.c_str(), idft.c_str());
   bool testmo = strstr(cutData.c_str(), idmo.c_str());
 
@@ -217,7 +215,6 @@ void handleWSData(String cutData)
   if (testcp)
   {
     cutData = cutData.substring(8);
-    Serial.println(cutData);
     byte del0;
     byte del1;
     byte del2;
@@ -285,13 +282,7 @@ void handleWSData(String cutData)
   // Flowtext
   else if (testft)
   {
-    text = cutData.substring(2);
-  }
-
-  // Flowtext speed
-  else if (testfs)
-  {
-    String ro = cutData.substring(2);
+    text = cutData.substring(3);
   }
 
   // Switch mode

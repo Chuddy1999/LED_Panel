@@ -52,6 +52,9 @@ extern vector<vector<bool>> W;
 extern vector<vector<bool>> X;
 extern vector<vector<bool>> Y;
 extern vector<vector<bool>> Z;
+extern vector<vector<bool>> OE;
+extern vector<vector<bool>> AE;
+extern vector<vector<bool>> UE;
 
 extern vector<vector<bool>> space;
 

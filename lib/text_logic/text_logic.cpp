@@ -130,6 +130,18 @@ vector<vector<bool>> get_character(char character)
         ret_character = Z;
         break;
 
+    case 'Ä':
+        ret_character = AE;
+        break;
+
+    case 'Ü':
+        ret_character = UE;
+        break;
+
+    case 'Ö':
+        ret_character = OE;
+        break;
+
     case '0':
         ret_character = null;
         break;
@@ -193,7 +205,7 @@ vector<byte> disassemble(String flowtext)
     {
         negative_iterator[loop0] = -(4 * loop0) - 1;
     }
-    for (loop1 = 0; negative_iterator.back() < 17; loop1++)
+    for (loop1 = 0; negative_iterator.back() < 19; loop1++)
     {
             for (loop3 = 0; loop3 < str_size; loop3++ /* char const &character : flowtext */)
             {
