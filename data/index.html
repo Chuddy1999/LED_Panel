@@ -13,7 +13,7 @@
 </head>
 
 <body>
-    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header mdl-layout--fixed-tabs">
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header mdl-layout--fixed-tabs" id="app">
         <header class="mdl-layout__header">
             <div class="mdl-layout__header-row">
                 <!-- Title -->
@@ -179,6 +179,7 @@
 
     //segment changes
     function changePage(id) {
+        document.getElementById('app').MaterialLayout.toggleDrawer()
         desiredPage = document.getElementById(id)
         siblings = desiredPage.parentNode.children
         for (let sibling of siblings) {

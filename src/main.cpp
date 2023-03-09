@@ -379,7 +379,6 @@ void loop()
     timeClient.update();
 
     getTime();
-    FastLED.show();
   }
   else if (mode == 1)
   { // display text mode
@@ -388,8 +387,8 @@ void loop()
 
   rainbow();
 
-  // FastLED.show();
-  // delay(fadeSpeed);
-  // FastLED.clear();
-  // delay(fadeSpeed);
+  FastLED.show();
+  delay(fadeSpeed);
+  FastLED.clear();
+  delay(fadeSpeed);
 }
