@@ -220,30 +220,6 @@ vector<vector<bool>>space = {
     {false,false,false}
 };
 
-vector<vector<bool>> AE = {
-    {true,false,true},
-    {false,true,false},
-    {true,false,true},
-    {true,false,true},
-    {true,false,true}
-};
-
-vector<vector<bool>> OE = {
-    {true,false,true},
-    {false,true,false},
-    {true,false,true},
-    {true,false,true},
-    {false,true,false}
-};
-
-vector<vector<bool>>UE = {
-    {true,false,true},
-    {false,false,false},
-    {true,false,true},
-    {true,false,true},
-    {true,true,true}
-};
-
 
 
 vector<vector<bool>>null = {
@@ -316,6 +292,88 @@ vector<vector<bool>>nine = {
     {false,false,true},
     {true,true,true}
 };
+
+
+vector<vector<bool>>exclamation = {
+    {false,true,false},
+    {false,true,false},
+    {false,true,false},
+    {false,false,false},
+    {false,true,false}
+};
+
+vector<vector<bool>>question = {
+    {true,true,false},
+    {false,false,true},
+    {false,true,false},
+    {false,false,false},
+    {false,true,false}
+};
+
+vector<vector<bool>>bracketL = {
+    {false,false,true},
+    {false,true,false},
+    {false,true,false},
+    {false,true,false},
+    {false,false,true}
+};
+
+vector<vector<bool>>bracketR = {
+    {true,false,false},
+    {false,true,false},
+    {false,true,false},
+    {false,true,false},
+    {true,false,false}
+};
+
+vector<vector<bool>>colon = {
+    {false,false,false},
+    {false,true,false},
+    {false,false,false},
+    {false,true,false},
+    {false,false,false}
+};
+
+vector<vector<bool>>addition = {
+    {false,false,false},
+    {false,true,false},
+    {true,true,true},
+    {false,true,false},
+    {false,false,false}
+};
+
+vector<vector<bool>>subtraction = {
+    {false,false,false},
+    {false,false,false},
+    {true,true,true},
+    {false,false,false},
+    {false,false,false}
+};
+
+vector<vector<bool>>underscore = {
+    {false,false,false},
+    {false,false,false},
+    {false,false,false},
+    {false,false,false},
+    {true,true,true}
+};
+
+vector<vector<bool>>multi = {
+    {false,false,false},
+    {false,false,false},
+    {false,true,false},
+    {false,false,false},
+    {false,false,false}
+};
+
+vector<vector<bool>>dot = {
+    {false,false,false},
+    {false,false,false},
+    {false,false,false},
+    {false,false,false},
+    {false,true,false}
+};
+
 
 
 // distance for clock

@@ -158,7 +158,7 @@
     function setText(){
         text = document.getElementById("flow_text").value;
         flowTextErrorState = document.getElementById("flow_text_error")
-        if(/^[a-zA-Z0-9 äöüÄÖÜ]*$/.test(text)){
+        if(/^[a-zA-Z0-9 !?():+-_*.]*$/.test(text)){
             flowTextErrorState.style.visibility = "hidden"
             console.log("Flow Text: " + text.toUpperCase())
             websocket.send("ft;" + text.toUpperCase())

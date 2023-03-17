@@ -130,18 +130,6 @@ vector<vector<bool>> get_character(char character)
         ret_character = Z;
         break;
 
-    case 'Ä':
-        ret_character = AE;
-        break;
-
-    case 'Ü':
-        ret_character = UE;
-        break;
-
-    case 'Ö':
-        ret_character = OE;
-        break;
-
     case '0':
         ret_character = null;
         break;
@@ -181,6 +169,46 @@ vector<vector<bool>> get_character(char character)
     case '9':
         ret_character = nine;
         break;
+
+    case '!':
+        ret_character = exclamation;
+        break;
+
+    case '?':
+        ret_character = question;
+        break;
+
+    case '(':
+        ret_character = bracketL;
+        break;
+
+    case ')':
+        ret_character = bracketR;
+        break;
+
+    case ':':
+        ret_character = colon;
+        break;
+
+    case '+':
+        ret_character = addition;
+        break;
+
+    case '-':
+        ret_character = subtraction;
+        break;
+
+    case '_':
+        ret_character = underscore;
+        break;
+
+    case '*':
+        ret_character = multi;
+        break;
+
+    case '.':
+        ret_character = dot;
+        break;
     }
     return ret_character;
 }
@@ -207,21 +235,21 @@ vector<byte> disassemble(String flowtext)
     }
     for (loop1 = 0; negative_iterator.back() < 19; loop1++)
     {
-            for (loop3 = 0; loop3 < str_size; loop3++ /* char const &character : flowtext */)
-            {
-                character = flowtext[loop3];
-                text_symbol = get_character(character);
+        for (loop3 = 0; loop3 < str_size; loop3++ /* char const &character : flowtext */)
+        {
+            character = flowtext[loop3];
+            text_symbol = get_character(character);
 
-                if (negative_iterator[loop3] < 19 && negative_iterator[loop3] >= 0)
-                {
-                    text_grid = grid_for_flow_content(translate_position(negative_iterator[loop3]));
-                    print_symbol = drawer(text_symbol, text_grid);
-                    instantOn(print_symbol);
-                    FastLED.show();
-                }
+            if (negative_iterator[loop3] < 19 && negative_iterator[loop3] >= 0)
+            {
+                text_grid = grid_for_flow_content(translate_position(negative_iterator[loop3]));
+                print_symbol = drawer(text_symbol, text_grid);
+                instantOn(print_symbol);
+                FastLED.show();
             }
-            FastLED.clear();
-            delay(150);
+        }
+        FastLED.clear();
+        delay(150);
         for (loop2 = 0; loop2 < (int)negative_iterator.size(); loop2++)
         {
             negative_iterator[loop2]++;

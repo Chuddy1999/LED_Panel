@@ -52,11 +52,19 @@ extern vector<vector<bool>> W;
 extern vector<vector<bool>> X;
 extern vector<vector<bool>> Y;
 extern vector<vector<bool>> Z;
-extern vector<vector<bool>> OE;
-extern vector<vector<bool>> AE;
-extern vector<vector<bool>> UE;
 
 extern vector<vector<bool>> space;
+
+extern vector<vector<bool>>exclamation;
+extern vector<vector<bool>>question;
+extern vector<vector<bool>>bracketL;
+extern vector<vector<bool>>bracketR;
+extern vector<vector<bool>>colon;
+extern vector<vector<bool>>addition;
+extern vector<vector<bool>>subtraction;
+extern vector<vector<bool>>underscore;
+extern vector<vector<bool>>multi;
+extern vector<vector<bool>>dot;
 
 
 extern vector<vector<bool>> null;
