@@ -10,6 +10,8 @@
 #include <TimeLib.h>
 #include <LittleFS.h>
 #include <AsyncElegantOTA.h>
+#include <PubSubClient.h>
+#include <ArduinoJSON.h>
 
 #include <iostream>
 #include <string.h>
@@ -28,6 +30,9 @@ String text = "TIMESTREAM 715";
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "de.pool.ntp.org");
 
+WiFiClient wifiClient;
+PubSubClient mqttClient(wifiClient);
+
 AsyncWebServer server(80);
 AsyncWebSocket websocket("/ws");
 String header;
@@ -38,9 +43,12 @@ String header;
 #define COLOR_ORDER GRB
 #define LED_PIN 1
 CRGB leds[NUM_LEDS];
-byte brightn = 100;
+byte brightn = 150;
 int16_t color = 0;
 int16_t saturation = 180;
+byte last_brightn = brightn;
+int16_t last_color = color;
+int16_t last_saturation = saturation;
 uint8_t fadeSpeed = 15;
 byte RainbowOn = 0;
 byte mode = 0;
@@ -158,7 +166,7 @@ void setTime(int time_piece, vector<vector<byte>> grid_position)
   instantOn(symbol);
 }
 
-void getTime()
+void print_time()
 {
   timeClient.update();
 
@@ -261,7 +269,7 @@ void handleWSData(String cutData)
     }
     else
     {
-      brightn = 100;
+      brightn = 150;
     }
   }
 
@@ -328,6 +336,71 @@ String processor(const String &var)
   return "Aus";
 }
 
+void mqtt_publish_state()
+{
+  StaticJsonDocument<96> doc;
+
+  doc["brightness"] = brightn;
+
+  if (brightn == 0)
+  {
+    doc["state"] = "OFF";
+  }
+  else
+  {
+    doc["state"] = "ON";
+  }
+
+  JsonObject hs = doc.createNestedObject("hs");
+  hs["h"] = map(color, 0, 255, 0, 360);
+  hs["s"] = map(saturation, 0, 255, 0, 100);
+
+  char output[256];
+  serializeJson(doc, output);
+  mqttClient.publish("clock/light", output);
+}
+
+void mqtt_update_state()
+{
+  if (last_brightn != brightn ||
+      last_color != color ||
+      last_saturation != saturation)
+  {
+    mqtt_publish_state();
+  }
+  last_brightn = brightn;
+  last_color = color;
+  last_saturation = saturation;
+}
+
+void mqtt_callback(char *topic, byte *payload, unsigned int length)
+{
+  String message = "";
+  for (int i = 0; i < length; i++)
+  {
+    message += (char)payload[i];
+  }
+  Serial.println(message);
+
+  StaticJsonDocument<96> doc;
+  deserializeJson(doc, payload);
+
+  if (doc["state"] == "OFF")
+  {
+    brightn = 0;
+  }
+  else
+  {
+    brightn = 150;
+  }
+  float temp_color = doc["color"]["h"] | float(map(color, 0, 255, 0, 360));
+  float temp_saturation = doc["color"]["s"] | float(map(saturation, 0, 255, 0, 100));
+
+  brightn = doc["brightness"] | brightn;
+  color = map(temp_color, 0, 360, 0, 255);
+  saturation = map(temp_saturation, 0, 100, 0, 255);
+}
+
 void setup()
 {
   Serial.begin(9600);
@@ -346,6 +419,41 @@ void setup()
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
+  mqttClient.setServer(MQTT_BROKER, MQTT_port);
+  mqttClient.setCallback(mqtt_callback);
+
+  while (!mqttClient.connected())
+  {
+    String client_id = "cock";
+    client_id += String(WiFi.macAddress());
+    Serial.printf("The client %s connects to the public mqtt broker\n", client_id.c_str());
+    if (mqttClient.connect(client_id.c_str(), MQTT_username, MQTT_password))
+    {
+      Serial.println("Public emqx mqtt broker connected");
+    }
+    else
+    {
+      Serial.print("failed with state ");
+      Serial.print(mqttClient.state());
+      delay(2000);
+    }
+  }
+
+  StaticJsonDocument<256> doc;
+
+  doc["schema"] = "json";
+  doc["name"] = "clock";
+  doc["state_topic"] = "clock/light";
+  doc["command_topic"] = "clock/light/set";
+  doc["color_mode"] = true;
+  doc["supported_color_modes"][0] = "hs";
+  doc["brightness"] = true;
+  doc["icon"] = "mdi:clock-digital";
+  char output[256];
+  serializeJson(doc, output, 256);
+  mqttClient.publish("homeassistant/light/clock/config", output);
+  mqttClient.subscribe("clock/light/set");
+
   websocket.onEvent(onWsEvent);
   server.addHandler(&websocket);
 
@@ -363,13 +471,14 @@ void setup()
 
 void loop()
 {
-  // put your main code here, to run repeatedly:
+  mqtt_update_state();
+  mqttClient.loop();
+
   if (mode == 0)
   { // display time mode
     timeClient.setTimeOffset(getTimeOffset());
     timeClient.update();
-
-    getTime();
+    print_time();
   }
   else if (mode == 1)
   { // display text mode
