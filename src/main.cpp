@@ -49,7 +49,8 @@ int16_t saturation = 180;
 byte last_brightn = brightn;
 int16_t last_color = color;
 int16_t last_saturation = saturation;
-uint8_t fadeSpeed = 15;
+uint8_t fadeSpeed = 30;
+sint8_t slinverted = 70;
 byte RainbowOn = 0;
 byte mode = 0;
 
@@ -255,9 +256,8 @@ void handleWSData(String cutData)
   else if (testsl)
   {
     String sl = cutData.substring(3);
-    sint8_t slinverted = sl.toInt() - 100;
-    slinverted = -1 * slinverted;
-    fadeSpeed = slinverted;
+    slinverted = sl.toInt();
+    fadeSpeed = map(slinverted, 0, 100, 100, 0);
   }
 
   // Power control
@@ -375,21 +375,23 @@ void mqtt_update_state()
 
 void mqtt_callback(char *topic, byte *payload, unsigned int length)
 {
-  String message = "";
-  for (int i = 0; i < length; i++)
-  {
-    message += (char)payload[i];
+  DynamicJsonDocument doc(8192);
+  DeserializationError error = deserializeJson(doc, payload);
+
+  if (error) {
+    Serial.print(F("deserializeJson() failed: "));
+    Serial.println(error.f_str());
+    return;
   }
-  Serial.println(message);
 
-  StaticJsonDocument<96> doc;
-  deserializeJson(doc, payload);
-
+  // analyzes and reacts to payload
   if (doc["state"] == "OFF")
   {
+    FastLED.clear();
     brightn = 0;
+    FastLED.show();
   }
-  else
+  else if (doc["state"] == "ON")
   {
     brightn = 150;
   }
@@ -399,26 +401,62 @@ void mqtt_callback(char *topic, byte *payload, unsigned int length)
   brightn = doc["brightness"] | brightn;
   color = map(temp_color, 0, 360, 0, 255);
   saturation = map(temp_saturation, 0, 100, 0, 255);
+
+  // flowtext
+  text = doc["flowtext"] | text;
+  if (doc["effect"] == "Uhrzeit")
+  {
+    mode = 0;
+  }
+  else if (doc["effect"] == "Fließtext")
+  {
+    mode = 1;
+  }
+  else if (doc["effect"] == "Bild"){
+    mode = 2;
+    FastLED.clear();
+    // Picture
+    uint8_t led_index = 0;
+    JsonArray picture = doc["picture"].as<JsonArray>();
+    for (JsonObject picture_item : picture) {
+      uint8_t picture_item_H = picture_item["H"];
+      uint8_t picture_item_S = picture_item["S"];
+      uint8_t picture_item_V = picture_item["V"];
+      leds[led_index] = CHSV(picture_item_H,picture_item_S,picture_item_V);
+      Serial.println(picture_item_H);
+      led_index ++;
+    }
+    FastLED.show();
+    FastLED.clear();
+  }
+
+  // rainbow effect
+  else if (doc["effect"] == "Farbwechsel")
+  {
+    if (RainbowOn == 1)
+    {
+      RainbowOn = 0;
+    }
+    else
+    {
+      RainbowOn = 1;
+    }
+  }
+  float temp_slinverted = doc["changespeed"] | float(slinverted);
+  fadeSpeed = uint8_t(map(temp_slinverted, 0, 100, 100, 0));
 }
 
-void setup()
-{
-  Serial.begin(9600);
-  LittleFS.begin();
-  FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, NUM_LEDS);
 
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    Serial.print(".");
-  }
-  // Print local IP address and start web server
-  Serial.println("");
-  Serial.println("WiFi connected.");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+void mqtt_update(){
+  mqttClient.loop();
+  mqtt_update_state();
+}
 
+
+void connect_mqtt(){
+  bool feedback = mqttClient.setBufferSize(8192);
+  Serial.print("could reserve buffer size: ");
+  Serial.println(feedback ? "true" : "false");
   mqttClient.setServer(MQTT_BROKER, MQTT_port);
   mqttClient.setCallback(mqtt_callback);
 
@@ -439,7 +477,7 @@ void setup()
     }
   }
 
-  StaticJsonDocument<256> doc;
+  StaticJsonDocument<384> doc;
 
   doc["schema"] = "json";
   doc["name"] = "clock";
@@ -449,10 +487,39 @@ void setup()
   doc["supported_color_modes"][0] = "hs";
   doc["brightness"] = true;
   doc["icon"] = "mdi:clock-digital";
-  char output[256];
-  serializeJson(doc, output, 256);
+  doc["effect"] = true;
+
+  JsonArray effect_list = doc.createNestedArray("effect_list");
+  effect_list.add("Farbwechsel");
+  effect_list.add("Fließtext");
+  effect_list.add("Uhrzeit");
+  char output[384];
+  serializeJson(doc, output, 384);
+
   mqttClient.publish("homeassistant/light/clock/config", output);
   mqttClient.subscribe("clock/light/set");
+}
+
+
+void setup()
+{
+  Serial.begin(9600);
+  LittleFS.begin();
+  FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, NUM_LEDS);
+
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+  // Print local IP address and start web server
+  Serial.println("");
+  Serial.println("WiFi connected.");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  connect_mqtt();
 
   websocket.onEvent(onWsEvent);
   server.addHandler(&websocket);
@@ -471,24 +538,24 @@ void setup()
 
 void loop()
 {
-  mqtt_update_state();
-  mqttClient.loop();
+  mqtt_update();
+  if (mqttClient.state() != 0){
+    connect_mqtt();
+  }
 
   if (mode == 0)
   { // display time mode
     timeClient.setTimeOffset(getTimeOffset());
     timeClient.update();
     print_time();
+    rainbow();
+    FastLED.show();
+    delay(fadeSpeed);
+    FastLED.clear();
+    delay(fadeSpeed);
   }
   else if (mode == 1)
   { // display text mode
-    text_print_symbol = disassemble(text);
+    text_print_symbol = disassemble(text,rainbow,mqtt_update);
   }
-
-  rainbow();
-
-  FastLED.show();
-  delay(fadeSpeed);
-  FastLED.clear();
-  delay(fadeSpeed);
 }

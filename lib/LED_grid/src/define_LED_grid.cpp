@@ -177,7 +177,7 @@ vector<vector<bool>>U = {
     {true,true,true}
 };
 vector<vector<bool>>V = {
-    {false,false,false},
+    {true,false,true},
     {true,false,true},
     {true,false,true},
     {true,false,true},

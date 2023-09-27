@@ -224,7 +224,7 @@ int translate_position(int position)
     return translated_position;
 }
 
-vector<byte> disassemble(String flowtext)
+vector<byte> disassemble(String flowtext, function< void() > rbw,  function< void() > mqtt_upd)
 {
     str_size = flowtext.length();
     negative_iterator.resize(str_size);
@@ -235,6 +235,8 @@ vector<byte> disassemble(String flowtext)
     }
     for (loop1 = 0; negative_iterator.back() < 19; loop1++)
     {
+        mqtt_upd();
+        rbw();
         for (loop3 = 0; loop3 < str_size; loop3++ /* char const &character : flowtext */)
         {
             character = flowtext[loop3];
@@ -245,11 +247,14 @@ vector<byte> disassemble(String flowtext)
                 text_grid = grid_for_flow_content(translate_position(negative_iterator[loop3]));
                 print_symbol = drawer(text_symbol, text_grid);
                 instantOn(print_symbol);
-                FastLED.show();
+                // FastLED.show();
             }
+            
         }
+        FastLED.show();
+        delay(100);
         FastLED.clear();
-        delay(150);
+        
         for (loop2 = 0; loop2 < (int)negative_iterator.size(); loop2++)
         {
             negative_iterator[loop2]++;
